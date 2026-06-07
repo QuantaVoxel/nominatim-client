@@ -1,4 +1,4 @@
-import { OutputFormat, ReverseResponsePayload, Layer } from "./common.js";
+import { OutputFormat, ReverseResponsePayload, Layer, JsonCallback } from "./common.js";
 
 export interface ReverseRequest {
   /**
@@ -44,7 +44,7 @@ export interface ReverseRequest {
    * Only has an effect when a JSON output format is selected.
    * @default 'unset'
    */
-  json_callback?: string;
+  json_callback?: JsonCallback;
 
   /**
    * Include a structural breakdown of the address into discrete element keys.

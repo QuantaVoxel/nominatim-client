@@ -29,12 +29,17 @@ export class NominatimClient {
     params: Record<string, any>,
   ): Promise<TResponse> {
     const urlParams = new URLSearchParams();
+    let callbackFn: ((data: any) => void) | undefined;
 
     Object.entries(params).forEach(([key, val]) => {
       if (val === undefined || val === null) return;
 
-      // Transform booleans to numerical 1 or 0 flags to protect Nominatim's URL parser
-      if (typeof val === "boolean") {
+      // Handle json_callback as a function
+      if (key === "json_callback" && typeof val === "function") {
+        callbackFn = val as (data: any) => void;
+        urlParams.append(key, "callback");
+      } else if (typeof val === "boolean") {
+        // Transform booleans to numerical 1 or 0 flags to protect Nominatim's URL parser
         urlParams.append(key, val ? "1" : "0");
       } else {
         urlParams.append(key, String(val));
@@ -55,13 +60,37 @@ export class NominatimClient {
     const textPayload = await response.text();
     const currentFormat = params.format;
 
-    // Detect if the format is a variant of JSON
+    // Detect if the format is a variant of JSON or if a JSONP callback is requested
     const isJsonExpected =
-      typeof currentFormat === "string" && currentFormat.includes("json");
+      (typeof currentFormat === "string" && currentFormat.includes("json")) ||
+      !!params.json_callback;
 
     if (isJsonExpected) {
       try {
-        return JSON.parse(textPayload) as TResponse;
+        let data: any;
+        const trimmedPayload = textPayload.trim();
+
+        // Automatically unwrap JSONP if a callback was requested
+        if (params.json_callback) {
+          // Supports alphanumeric, underscores, and dots in callback names
+          const jsonMatch = trimmedPayload.match(
+            /^[a-zA-Z0-9_.]+\((.*)\);?$/s,
+          );
+          if (jsonMatch) {
+            data = JSON.parse(jsonMatch[1]);
+          } else {
+            data = JSON.parse(trimmedPayload);
+          }
+        } else {
+          data = JSON.parse(trimmedPayload);
+        }
+
+        // Execute function callback if provided
+        if (callbackFn) {
+          callbackFn(data);
+        }
+
+        return data as TResponse;
       } catch {
         return textPayload as unknown as TResponse;
       }

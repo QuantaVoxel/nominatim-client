@@ -6,6 +6,12 @@ export type OutputFormat =
   | "geocodejson";
 
 /**
+ * Type definition for JSONP callback parameters.
+ * Can be a string matching a global function name or a direct function reference.
+ */
+export type JsonCallback = string | ((data: any) => void);
+
+/**
  * Bounding box representation array tracking geographic boundaries.
  * Format: `[minLat, maxLat, minLon, maxLon]`
  * @example ["51.3473219", "51.6673219", "-0.2876474", "0.0323526"]

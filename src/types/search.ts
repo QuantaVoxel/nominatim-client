@@ -1,4 +1,4 @@
-import { OutputFormat, SearchAndLookupResponse, Layer } from "./common.js";
+import { OutputFormat, SearchAndLookupResponse, Layer, JsonCallback } from "./common.js";
 
 /**
  * Feature type granular filter constraints for the address layer.
@@ -66,7 +66,7 @@ export interface SearchRequest {
    * Only has an effect for JSON output formats.
    * @default 'unset'
    */
-  json_callback?: string;
+  json_callback?: JsonCallback;
 
   /**
    * Limit the maximum number of returned results.

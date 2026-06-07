@@ -1,3 +1,5 @@
+import { JsonCallback } from "./common.js";
+
 export interface DetailsRequest {
   /**
    * The internal Nominatim database identifier for a specific place.
@@ -42,7 +44,7 @@ export interface DetailsRequest {
    * Wrap JSON output in a callback function with the given name (JSONP format handling).
    * @default 'unset'
    */
-  json_callback?: string;
+  json_callback?: JsonCallback;
 
   /**
    * Include a structured breakdown of the address into structural elements.
