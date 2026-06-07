@@ -41,6 +41,8 @@ console.log(results[0].display_name); // "Berlin, Deutschland"
 
 ## 📖 API Documentation
 
+For a complete list of parameters and detailed field descriptions, please refer to the official [Nominatim API Overview](https://nominatim.org/release-docs/latest/api/Overview/).
+
 ### Search
 Geocoding by address or query string.
 
