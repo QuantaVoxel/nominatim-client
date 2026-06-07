@@ -1,4 +1,9 @@
 import * as T from "./types/index.js";
+import {
+  SearchLookupFormatMap,
+  ReverseFormatMap,
+  OutputFormat,
+} from "./types/common.js";
 
 export class NominatimClient {
   private baseUrl: string;
@@ -10,54 +15,120 @@ export class NominatimClient {
 
     if (!this.userAgent) {
       throw new Error(
-        "Nominatim policy requires you to set a custom User-Agent identifying your app.",
+        "Nominatim policy requires you to set a custom User-Agent identifying your application client.",
       );
     }
   }
 
+  /**
+   * Internal request orchestrator that translates booleans to 1/0, formats URLs,
+   * and conditionally handles JSON parsing vs raw text processing.
+   */
   private async request<TResponse>(
     endpoint: string,
     params: Record<string, any>,
   ): Promise<TResponse> {
-    // Inject json format by default if missing
-    if (!params.format) params.format = "jsonv2";
-
     const urlParams = new URLSearchParams();
+
     Object.entries(params).forEach(([key, val]) => {
-      if (val !== undefined) urlParams.append(key, String(val));
+      if (val === undefined || val === null) return;
+
+      // Transform booleans to numerical 1 or 0 flags to protect Nominatim's URL parser
+      if (typeof val === "boolean") {
+        urlParams.append(key, val ? "1" : "0");
+      } else {
+        urlParams.append(key, String(val));
+      }
     });
 
-    const response = await fetch(
-      `${this.baseUrl}${endpoint}?${urlParams.toString()}`,
-      {
-        headers: { "User-Agent": this.userAgent },
-      },
-    );
+    const url = `${this.baseUrl}${endpoint}?${urlParams.toString()}`;
+    const response = await fetch(url, {
+      headers: { "User-Agent": this.userAgent },
+    });
 
     if (!response.ok) {
-      throw new Error(`Nominatim API HTTP Error: ${response.statusText}`);
+      throw new Error(
+        `Nominatim API HTTP Error: [${response.status}] ${response.statusText}`,
+      );
     }
 
-    return response.json() as Promise<TResponse>;
+    const textPayload = await response.text();
+    const currentFormat = params.format;
+
+    // Detect if the format is a variant of JSON
+    const isJsonExpected =
+      typeof currentFormat === "string" && currentFormat.includes("json");
+
+    if (isJsonExpected) {
+      try {
+        return JSON.parse(textPayload) as TResponse;
+      } catch {
+        return textPayload as unknown as TResponse;
+      }
+    }
+
+    return textPayload as unknown as TResponse;
   }
 
-  public search(params: T.SearchRequest): Promise<T.SearchResponse[]> {
-    return this.request<T.SearchResponse[]>("/search", params);
+  // ==========================================
+  // SEARCH ENDPOINT OVERLOADS
+  // ==========================================
+  public search<F extends OutputFormat>(
+    params: Omit<T.SearchRequest, "format"> & { format: F },
+  ): Promise<SearchLookupFormatMap[F]>;
+  public search(
+    params: Omit<T.SearchRequest, "format"> & { format?: undefined },
+  ): Promise<SearchLookupFormatMap["jsonv2"]>;
+  public search(params: any): Promise<any> {
+    const requestParams = { format: "jsonv2", ...params };
+    return this.request("/search", requestParams);
   }
 
-  public reverse(params: T.ReverseRequest): Promise<T.ReverseResponse> {
-    return this.request<T.ReverseResponse>("/reverse", params);
+  // ==========================================
+  // REVERSE ENDPOINT OVERLOADS
+  // ==========================================
+  public reverse<F extends OutputFormat>(
+    params: Omit<T.ReverseRequest, "format"> & { format: F },
+  ): Promise<ReverseFormatMap[F]>;
+  public reverse(
+    params: Omit<T.ReverseRequest, "format"> & { format?: undefined },
+  ): Promise<ReverseFormatMap["jsonv2"]>;
+  public reverse(params: any): Promise<any> {
+    const requestParams = { format: "jsonv2", ...params };
+    return this.request("/reverse", requestParams);
   }
 
-  public lookup(params: T.LookupRequest): Promise<T.LookupResponse[]> {
-    return this.request<T.LookupResponse[]>("/lookup", params);
+  // ==========================================
+  // LOOKUP ENDPOINT OVERLOADS
+  // ==========================================
+  public lookup<F extends OutputFormat>(
+    params: Omit<T.LookupRequest, "format"> & { format: F },
+  ): Promise<SearchLookupFormatMap[F]>;
+  public lookup(
+    params: Omit<T.LookupRequest, "format"> & { format?: undefined },
+  ): Promise<SearchLookupFormatMap["jsonv2"]>;
+  public lookup(params: any): Promise<any> {
+    const requestParams = { format: "jsonv2", ...params };
+    return this.request("/lookup", requestParams);
   }
 
-  public status(params: T.StatusRequest = {}): Promise<T.StatusResponse> {
-    return this.request<T.StatusResponse>("/status", params);
+  // ==========================================
+  // DETAILS ENDPOINT
+  // ==========================================
+  public details(
+    params: Omit<T.DetailsRequest, "format"> & { format?: "json" },
+  ): Promise<T.DetailsResponse> {
+    const requestParams = { format: "json", ...params };
+    return this.request<T.DetailsResponse>("/details", requestParams);
   }
 
-  public details(params: T.DetailsRequest): Promise<T.DetailsResponse> {
-    return this.request<T.DetailsResponse>("/details", params);
+  // ==========================================
+  // STATUS ENDPOINT
+  // ==========================================
+  public status(
+    params: Omit<T.StatusRequest, "format"> & { format?: "json" } = {},
+  ): Promise<T.StatusResponse> {
+    const requestParams = { format: "json", ...params };
+    return this.request<T.StatusResponse>("/status", requestParams);
   }
 }
