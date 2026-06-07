@@ -21,8 +21,9 @@ This library provides a high-level, strongly typed interface for geocoding, reve
 ### Commands
 - **Build**: `npm run build` - Compiles TypeScript to JavaScript in the `dist/` directory.
 - **Run Example**: `npm start` - Executes the demonstration client in `src/index.ts` using `tsx`.
-- **Lint/Format**: (TODO: Standard linting/formatting tools are not yet configured in `package.json`).
-- **Test**: (TODO: Testing framework is not yet configured).
+- **Test**: `npm test` - Runs unit tests using Vitest.
+- **Test Watch**: `npm run test:watch` - Runs tests in watch mode.
+- **Test Coverage**: `npm run test:coverage` - Generates a test coverage report.
 
 ## Development Conventions
 
