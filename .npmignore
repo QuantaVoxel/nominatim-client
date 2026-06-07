@@ -1,0 +1,22 @@
+# Prerequisites and local configurations
+.idea/
+.vscode/
+.npmrc
+
+# Development & Source folders
+src/
+tsconfig.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Testing & Coverage
+coverage/
+*.spec.ts
+*.test.ts
+
+# OS files
+.DS_Store
+Thumbs.db

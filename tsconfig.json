@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022" /* Specify ECMAScript target version */,
+    "module": "NodeNext" /* Specify module code generation */,
+    "moduleResolution": "NodeNext" /* How modules get resolved */,
+    "rootDir": "./src" /* Specify the root folder of input files */,
+    "outDir": "./dist" /* Redirect output structure to the directory */,
+    "declaration": true /* Generates corresponding '.d.ts' file for npm package */,
+
+    /* Strict Type-Checking Options */
+    "strict": true /* Enable all strict type-checking options */,
+    "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type */,
+
+    /* Additional Checks */
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules */,
+    "skipLibCheck": true /* Skip type checking of declaration files */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file */
+  },
+  "include": ["src/**/*"] /* Files to include in compilation */,
+  "exclude": ["node_modules", "dist"] /* Files to ignore */
+}

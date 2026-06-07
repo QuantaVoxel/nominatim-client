@@ -1,0 +1,57 @@
+name: Build and Publish Package
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers whenever you push a tag like v1.0.0, v1.1.2, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write  # Crucial for GitHub Packages
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run build
+
+      # --- STEP 1: PUBLISH TO PUBLIC NPMJS.COM ---
+      - name: Authenticate with NPM Registry
+        run: |
+          npm config set registry "https://registry.npmjs.org/"
+          npm config set //registry.npmjs.org/:_authToken "${{ secrets.NPM_TOKEN }}"
+
+      - name: Publish to NPM
+        run: npm publish --access public
+
+      # --- STEP 2: PUBLISH TO GITHUB PACKAGES ---
+      - name: Re-write package name for GitHub Scoped Requirements
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            // Strip any existing scope if present, then add the repository owner scope
+            const baseName = pkg.name.includes('/') ? pkg.name.split('/')[1] : pkg.name;
+            pkg.name = '@${{ github.repository_owner }}/' + baseName;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+      - name: Authenticate with GitHub Packages
+        run: |
+          npm config set registry "https://npm.pkg.github.com/"
+          npm config set //npm.pkg.github.com/:_authToken "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Publish to GitHub Packages
+        run: npm publish

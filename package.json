@@ -1,0 +1,61 @@
+{
+  "name": "@quantavoxel/nominatim-client",
+  "version": "1.0.0",
+  "description": "A JavaScript/TypeScript client for the Nominatim API (OpenStreetMap geocoding service)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts"
+  },
+  "keywords": [
+    "nominatim",
+    "openstreetmap",
+    "osm",
+    "geocoding",
+    "reverse-geocoding",
+    "geocoder",
+    "geolocation",
+    "maps",
+    "address",
+    "search"
+  ],
+  "author": "Quantavoxel <developer@quantavoxel.digital>",
+  "license": "MIT",
+  "homepage": "https://github.com/Quantavoxel/nominatim-client#readme",
+  "bugs": {
+    "url": "https://github.com/Quantavoxel/nominatim-client/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quantavoxel/nominatim-client.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.20",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3"
+  },
+  "nominatimConfig": {
+    "defaultBaseUrl": "https://nominatim.openstreetmap.org",
+    "apiVersion": "1"
+  }
+}
